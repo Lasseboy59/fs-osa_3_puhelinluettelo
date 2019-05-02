@@ -30,7 +30,6 @@ let persons = [
 app.use(bodyParser.json())
 app.use(cors())
 
-// create morgan middleware
 app.use(morgan('tiny'))
 app.use(morgan((tokens, req, res) => {
   return [
@@ -57,7 +56,6 @@ app.get('/info', (req, res) => {
 app.get('/api/persons', (req, res) => {
   res.json(persons)
 })
-
 
 // get with id
 app.get('/api/persons/:id', (req, res) => {
@@ -100,32 +98,21 @@ const generateId = () => {
   }
 }
 
-// post (create new contact)
-app.post('/api/persons', (req, res) => {
-  const body = req.body
+app.post("/api/persons/", (req, res) => {
+  const person = req.body;
 
-  if (persons.find(a => a.name === body.name)) {
-    return res.status(409).json({
-      error: 'name must be unique'
-    })
-  }
-  else if (!body.name || !body.number) {
-    return res.status(400).json({
-      error: 'name or number is missing'
-    })
+  if (person.name === undefined || person.number == undefined) {
+    return res.status(400).json({ error: 'name or number is missing'});
   }
 
-  const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number
+  if (persons.find(person => person.name === req.body.name)) {
+    return res.status(400).json({ error: "name must be unique" });
   }
 
-  persons = persons.concat(person)
-  return res.status(201).json({
-    message: 'lisäys suoritettu'
-  })
-})
+  person.id = generateId()
+  persons = persons.concat(person);
+  res.json(person);
+});
 
 const error = (request, response) => {
   response.status(404).send({ error: '404 unknown endpoint' })
