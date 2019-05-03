@@ -1,8 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 let persons = [
   {
@@ -54,8 +56,17 @@ app.get('/info', (req, res) => {
 })
 
 // get all
+app.get('/api/people', (req, res) => {
+  Person.find({}).then(persons => {
+    res.json(persons)
+  })
+})
+
+// get all
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({}).then(people => {
+    res.json(people.map(person => person.toJSON()))
+  })
 })
 
 // get with id
