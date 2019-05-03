@@ -56,13 +56,6 @@ app.get('/info', (req, res) => {
 })
 
 // get all
-app.get('/api/people', (req, res) => {
-  Person.find({}).then(persons => {
-    res.json(persons)
-  })
-})
-
-// get all
 app.get('/api/persons', (req, res) => {
   Person.find({}).then(people => {
     res.json(people.map(person => person.toJSON()))
