@@ -103,6 +103,7 @@ const generateId = () => {
   }
 }
 
+// add person
 app.post("/api/persons/", (req, res) => {
   const person = req.body;
 
@@ -114,9 +115,14 @@ app.post("/api/persons/", (req, res) => {
     return res.status(400).json({ error: "name must be unique" });
   }
 
-  person.id = generateId()
-  persons = persons.concat(person);
-  res.json(person);
+  const newPerson = new Person({
+    name: person.name,
+    number: person.number
+  });
+
+  newPerson.save().then(savedPerson => {
+    res.json(savedPerson.toJSON());
+  });
 });
 
 const error = (request, response) => {
