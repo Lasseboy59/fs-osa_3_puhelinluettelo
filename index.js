@@ -64,30 +64,34 @@ app.get('/api/persons', (req, res) => {
 
 // get with id
 app.get('/api/persons/:id', (req, res) => {
-  const id = persons.find(a => a.id === Number(req.params.id))
-  if (id) {
-    res.json(id)
-  } else {
-    res.status(404).json({
-      message: 'contact not found'
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person.toJSON())
+      } else {
+        res.status(404).end() 
+      }
     })
-  }
+    .catch(error => {
+      console.log(error)
+      res.status(400).send({ error: 'malformatted id' })
+      // .catch(error => next(error))
+    })
 })
 
 // delete
-app.delete('/api/persons/:id', (req, res) => {
-  const findId = persons.find(a => a.id === Number(req.params.id))
-  if (findId) {
-    persons = persons.filter(a => a.id !== Number(req.params.id))
-    res.status(200).json({
-      message: 'contact deleted'
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndRemove(req.params.id)
+    .then(person => {
+      if(person) {
+        res.status(200).send({ ok: `user < ${person.name} > deleted` })
+      } 
+      else {
+      res.status(204).end()
+      }
     })
-  } else {
-    res.status(404).json({
-      message: 'contact not found'
-    })
-  }
-});
+    .catch(error => next(error))
+})
 
 // generate ID
 const generateId = () => {
@@ -103,12 +107,12 @@ const generateId = () => {
   }
 }
 
-// add person
+// add person  !!!!! generate id
 app.post("/api/persons/", (req, res) => {
   const person = req.body;
 
-  if (person.name === undefined || person.number == undefined) {
-    return res.status(400).json({ error: 'name or number is missing'});
+  if (person.name === undefined || person.number == undefined) {
+    return res.status(400).json({ error: 'name or number is missing' });
   }
 
   if (persons.find(person => person.name === req.body.name)) {
