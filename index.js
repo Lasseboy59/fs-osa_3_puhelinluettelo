@@ -63,20 +63,16 @@ app.get('/api/persons', (req, res) => {
 })
 
 // get with id
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
-    .then(person => {
-      if (person) {
-        res.json(person.toJSON())
+    .then(note => {
+      if (note) {
+        res.json(note.toJSON())
       } else {
-        res.status(404).end() 
+        res.status(404).end()
       }
     })
-    .catch(error => {
-      console.log(error)
-      res.status(400).send({ error: 'malformatted id' })
-      // .catch(error => next(error))
-    })
+    .catch(error => next(error))
 })
 
 // delete
@@ -93,21 +89,7 @@ app.delete('/api/persons/:id', (req, res, next) => {
     .catch(error => next(error))
 })
 
-// generate ID
-const generateId = () => {
-  let maxId;
-  let findId = true
-  while (findId) {
-    maxId = Math.floor(Math.random() * 500) + 50;
-    let inPersons = persons.find(a => a.id === maxId)
-    if (!inPersons) {
-      findId = false
-      return maxId
-    }
-  }
-}
-
-// add person  !!!!! generate id
+// add person
 app.post("/api/persons/", (req, res) => {
   const person = req.body;
 
@@ -129,11 +111,17 @@ app.post("/api/persons/", (req, res) => {
   });
 });
 
-const error = (request, response) => {
-  response.status(404).send({ error: '404 unknown endpoint' })
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError' && error.kind == 'ObjectId') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
 }
 
-app.use(error)
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
