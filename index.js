@@ -48,11 +48,16 @@ app.use(morgan((tokens, req, res) => {
 // info
 app.get('/info', (req, res) => {
   const date = new Date();
-  res.send(`
+
+  Person.find({}).then(people => {
+    res.send(`
     <h1>Puhelinluettelo</h1>
-    <p>Puhelinluettelossa ${persons.length} henkilön tiedot</p>
+    <p>Puhelinluettelossa ${people.reduce(sum => {
+      return sum + 1;
+    }, 0)} henkilön tiedot</p>
     <p>${date}</p>
     `)
+  })
 })
 
 // get all
