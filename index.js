@@ -90,7 +90,7 @@ app.delete('/api/persons/:id', (req, res, next) => {
 })
 
 // add person
-app.post("/api/persons/", (req, res) => {
+app.post('/api/persons/', (req, res) => {
   const person = req.body;
 
   if (person.name === undefined || person.number == undefined) {
@@ -109,6 +109,19 @@ app.post("/api/persons/", (req, res) => {
   newPerson.save().then(savedPerson => {
     res.json(savedPerson.toJSON());
   });
+});
+
+// change phone number
+app.put("/api/persons/:id", (req, res, next) => {
+  const body = req.body
+  const person = {
+    number: body.number
+  };
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    .then(updatedPerson => {
+      res.json(updatedPerson.toJSON());
+    })
+    .catch(error => next(error));
 });
 
 const errorHandler = (error, request, response, next) => {
