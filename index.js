@@ -84,22 +84,26 @@ app.get('/api/persons/:id', (req, res, next) => {
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndRemove(req.params.id)
     .then(person => {
-      if(person) {
+      if (person) {
         res.status(200).send({ ok: `user < ${person.name} > deleted` })
-      } 
+      }
       else {
-      res.status(204).end()
+        res.status(204).end()
       }
     })
     .catch(error => next(error))
 })
 
 // add person
-app.post('/api/persons/', (req, res) => {
+app.post('/api/persons/', (req, res, next) => {
   const person = req.body;
 
-  if (person.name === undefined || person.number == undefined) {
-    return res.status(400).json({ error: 'name or number is missing' });
+  if (person.name === undefined) {
+    return res.status(400).json({ error: 'name is missing' });
+  }
+
+  if (person.number === undefined) {
+    return res.status(400).json({ error: 'number is missing' });
   }
 
   if (persons.find(person => person.name === req.body.name)) {
@@ -111,9 +115,11 @@ app.post('/api/persons/', (req, res) => {
     number: person.number
   });
 
-  newPerson.save().then(savedPerson => {
-    res.json(savedPerson.toJSON());
-  });
+  newPerson
+    .save()
+    .then(savedPerson => {
+      res.json(savedPerson.toJSON());
+    }).catch(error => next(error))
 });
 
 // change phone number
@@ -134,8 +140,9 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError' && error.kind == 'ObjectId') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
-
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
   next(error)
 }
 
