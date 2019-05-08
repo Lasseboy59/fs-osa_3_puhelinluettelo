@@ -8,24 +8,24 @@ const Person = require('./models/person')
 
 let persons = [
   {
-    "id": 1,
-    "name": "Arto Hellas",
-    "number": "040-123456",
+    'id': 1,
+    'name': 'Arto Hellas',
+    'number': '040-123456',
   },
   {
-    "id": 2,
-    "name": "Martti Tienari",
-    "number": "040-123456",
+    'id': 2,
+    'name': 'Martti Tienari',
+    'number': '040-123456',
   },
   {
-    "id": 3,
-    "name": "Arto Järvinen",
-    "number": "040-123456",
+    'id': 3,
+    'name': 'Arto Järvinen',
+    'number': '040-123456',
   },
   {
-    "id": 4,
-    "name": "Lea Kutvonen",
-    "number": "040-123456",
+    'id': 4,
+    'name': 'Lea Kutvonen',
+    'number': '040-123456',
   }
 ]
 
@@ -37,17 +37,17 @@ app.use(morgan('tiny'))
 app.use(morgan((tokens, req, res) => {
   return [
     tokens.method(req, res),
-    tokens.url(req, res), "status:",
-    tokens.status(req, res), "length:",
+    tokens.url(req, res), 'status:',
+    tokens.status(req, res), 'length:',
     tokens.res(req, res, 'content-length'), 'response time:',
     tokens['response-time'](req, res), 'ms',
-    (tokens.method(req, res) === "POST") ? JSON.stringify(req.body) : ''
+    (tokens.method(req, res) === 'POST') ? JSON.stringify(req.body) : ''
   ].join(' ')
 }))
 
 // info
 app.get('/info', (req, res) => {
-  const date = new Date();
+  const date = new Date()
 
   Person.find({}).then(people => {
     res.send(`
@@ -96,49 +96,49 @@ app.delete('/api/persons/:id', (req, res, next) => {
 
 // add person
 app.post('/api/persons/', (req, res, next) => {
-  const person = req.body;
+  const person = req.body
 
   if (person.name === undefined) {
-    return res.status(400).json({ error: 'name is missing' });
+    return res.status(400).json({ error: 'name is missing' })
   }
 
   if (person.number === undefined) {
-    return res.status(400).json({ error: 'number is missing' });
+    return res.status(400).json({ error: 'number is missing' })
   }
 
   if (persons.find(person => person.name === req.body.name)) {
-    return res.status(400).json({ error: "name must be unique" });
+    return res.status(400).json({ error: 'name must be unique' })
   }
 
   const newPerson = new Person({
     name: person.name,
     number: person.number
-  });
+  })
 
   newPerson
     .save()
     .then(savedPerson => {
-      res.json(savedPerson.toJSON());
+      res.json(savedPerson.toJSON())
     }).catch(error => next(error))
-});
+})
 
 // change phone number
-app.put("/api/persons/:id", (req, res, next) => {
+app.put('/api/persons/:id', (req, res, next) => {
   const body = req.body
   const person = {
     number: body.number
-  };
+  }
   Person.findByIdAndUpdate(req.params.id, person, { new: true })
     .then(updatedPerson => {
-      res.json(updatedPerson.toJSON());
+      res.json(updatedPerson.toJSON())
     })
-    .catch(error => next(error));
-});
+    .catch(error => next(error))
+})
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
-  if (error.name === 'CastError' && error.kind == 'ObjectId') {
+  if (error.name === 'CastError' && error.kind === 'ObjectId') {
     return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
